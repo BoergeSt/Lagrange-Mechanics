@@ -31,6 +31,7 @@ sim.run()
 * scipy: Used for the numerical integration of the resulting ODEs and physical constants
 * matplotlib: Used for the display of the solution
 * time: Well... in order to measure some times...
+* logging: In order to log stuff
 
 
 ## Possible Scenarios and example implementations
