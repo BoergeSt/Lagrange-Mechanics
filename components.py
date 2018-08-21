@@ -10,6 +10,7 @@ class Component:
     """Base Class for all Components"""
 
     def setup(self,i,t):
+        self.t = t
         return i
 
     def potential_expr(self):
@@ -34,20 +35,24 @@ class Component:
         pass
 
 
+
     
 class FixPoint(Component):
     """A non moving Point object to anchor other objects"""
-    def __init__(self,position=np.array([0,0])):
+    def __init__(self,position=np.array([0,0]),moving = False):
         self.position = position
+        self.moving = moving
 
-    def get_position(self):
+    def get_position(self,t=0):
+        if self.moving:
+            return np.array([self.position[0].subs(self.t,t),self.position[1].subs(self.t,t)])
         return self.position
 
     def get_position_expr(self):
         return self.position
 
-    def plot(self,ax):
-        x,y = self.get_position().T
+    def plot(self,ax,t=0):
+        x,y = self.get_position(t).T
         ax.plot(x,y,'ok')
 
 class FixLine(Component):
@@ -61,7 +66,7 @@ class FixLine(Component):
     def l2g_expr(self,local):
         return self.l2g(local)
 
-    def plot(self,ax):
+    def plot(self,ax,t=0):
         x,y = np.array([self.l2g(-10),self.l2g(10)]).T
         ax.plot(x,y,'-k')
 
@@ -77,7 +82,7 @@ class FixCircle(Component):
     def l2g_expr(self,local):
         return [self.midpoint[0]+self.radius*sp.sin(local),self.midpoint[1]-self.radius*sp.cos(local)]
 
-    def plot(self,ax):
+    def plot(self,ax,t=0):
         circle = plt.Circle(self.midpoint,self.radius,color = "black",fill=False)
         ax.add_artist(circle)
 
@@ -90,19 +95,18 @@ class Point(Component):
         self.local = local
         self.mass = mass
         
-    def get_position(self):
-        return self.parent.l2g(self.local)
+    def get_position(self,t=0):
+        return self.parent.l2g(self.local,t)
 
     def get_position_expr(self):
         return self.parent.l2g_expr(self.local)
 
-    def plot(self,ax):
-        #print("Point at {}".format(self.get_position()))
-        x,y = self.get_position().T
+    def plot(self,ax,t=0):
+        x,y = self.get_position(t).T
         ax.plot(x,y,'or')
     
     def setup(self,i,t):
-        self.t = t;
+        self.t = t
         return i
 
     def potential_expr(self):
@@ -131,13 +135,13 @@ class Trolley(Component):
         self.Q,self.dQ,self.ddQ = sp.symbols('Q{0} dQ{0} ddQ{0}'.format(self.index))
         return i+1
 
-    def get_position(self):
+    def get_position(self,t=0):
         return self.parent.l2g(self.local)
 
     def get_position_expr(self):
         return self.parent.l2g_expr(self.q(self.t))
 
-    def plot(self,ax):
+    def plot(self,ax,t=0):
         #print("Point at {}".format(self.get_position()))
         x,y = self.get_position().T
         ax.plot(x,y,'or')
@@ -186,16 +190,16 @@ class Connector(Component):
         self.Q,self.dQ,self.ddQ = sp.symbols('Q{0} dQ{0} ddQ{0}'.format(self.index))
         return i+1
 
-    def l2g(self,local): #local to global
-        return self.parent.get_position()+self.length*(self.offset+local)*np.array([np.sin(self.phi),-np.cos(self.phi)])
+    def l2g(self,local,t=0): #local to global
+        return self.parent.get_position(t)+self.length*(self.offset+local)*np.array([np.sin(self.phi),-np.cos(self.phi)])
 
     def l2g_expr(self,local): #local to global expression
         modifier = self.length*(self.offset+local)
         par_pos = self.parent.get_position_expr()
         return [par_pos[0]+modifier*sp.sin(self.q(self.t)),par_pos[1]-modifier*sp.cos(self.q(self.t))]
     
-    def plot(self,ax):
-        x,y = np.array([self.l2g(0),self.l2g(1)]).T
+    def plot(self,ax,t=0):
+        x,y = np.array([self.l2g(0,t),self.l2g(1,t)]).T
         ax.plot(x,y,'-k')
 
     def calculate_ode_functions(self,f,L):

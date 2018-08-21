@@ -33,6 +33,7 @@ class Simulation:
         self.xlim = xlim
         self.ylim = ylim
         self.subintegrations = subintegrations
+        self.t = sp.symbols('t')
         
         self.ax = self.fig.add_subplot(111,aspect='equal', autoscale_on=False, xlim=self.xlim, ylim=self.ylim)
         self.movie = movie
@@ -43,27 +44,26 @@ class Simulation:
         self.Objects.extend(objects)
         logger.debug("Added objects")
 
-    def plot(self):
+    def plot(self, t = 0):
         self.ax.cla()
         self.ax.autoscale(False)
         self.ax.set_xlim(self.xlim)
         self.ax.set_ylim(self.ylim)
 
         for object in self.Objects:
-            object.plot(self.ax);
+            object.plot(self.ax,t) 
 
     def setup(self):
         logger.debug("Starting setup")
-        i = 0;
-        t = sp.symbols('t')
+        i = 0 
         for object in self.Objects:
-            i = object.setup(i,t)
+            i = object.setup(i,self.t)
         logger.debug("Finished setup of {} objects with {} independent variables".format(len(self.Objects),i))
             
 
     
     def calculate_potential_expr(self):
-        U = 0;
+        U = 0 
         for i,object in enumerate(self.Objects):
             Ui = object.potential_expr() 
             logger.debug("Object {} has potential {}".format(i,Ui))
@@ -72,7 +72,7 @@ class Simulation:
         return sp.simplify(U)
 
     def calculate_kinetic_expr(self):
-        T = 0;
+        T = 0 
         for i,object in enumerate(self.Objects):
             Ti = object.kinetic_expr()
             logger.debug("Object {} has kinetic Energy {}".format(i,Ti))
@@ -98,12 +98,12 @@ class Simulation:
         rf = sp.solve(f,s)
         for i in range(len(f)):
             f[i]=rf[s[i]]
-        return f;
+        return f 
 
     def get_x0(self):
         x0 = []
         for object in self.Objects:
-            object.get_x0(x0);
+            object.get_x0(x0) 
         return x0
 
     def get_symbols(self):
@@ -117,9 +117,8 @@ class Simulation:
             object.update(x)
 
     def run(self):
-        self.plot()
-    
         self.setup()
+        self.plot()
         L = self.calculate_lagrange_expr()
         f = self.calculate_ode_functions(L)
     
@@ -131,8 +130,8 @@ class Simulation:
         for i,fi in enumerate(f):
             f2.extend([s[i][1],fi])
         logger.info("ODE System: \n\t{}".format("\n\t".join([str(o) for o in f2])))
-        func = sp.lambdify(flatten(s),f2)
-        rhs2 = lambda t,x: func(*x)
+        func = sp.lambdify([self.t]+flatten(s),f2)
+        rhs2 = lambda t,x: func(t,*x)
     
         x0 = self.get_x0()
         logger.debug("x0 = {}".format(x0))
@@ -149,7 +148,7 @@ class Simulation:
                 r.integrate(r.t+self.dt/self.subintegrations)
             self.update(r.y)
             #print(r.t)
-            self.plot()
+            self.plot(r.t)
 
 
     
