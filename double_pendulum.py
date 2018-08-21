@@ -5,16 +5,16 @@ import numpy as np
 
 
 if __name__=="__main__":
-    sim = Simulation(movie=True)
+    sim = Simulation(movie=False)
     
     Base = FixPoint()
-    C1 = Connector(Base,2/3,phi0 = np.pi/4)
+    C1 = Connector(Base, phi0 = np.pi/4)
     P1 = Point(C1)
-    sim.addObjects([Base,C1,P1])
+    sim.addObjects([Base, C1, P1])
 
-    C2 = Connector(P1,0.5)
+    C2 = Connector(P1, length = 0.5)
     P2 = Point(C2)
-    sim.addObjects([C2,P2])
+    sim.addObjects([C2, P2])
 
     #C3 = Connector(P2,1/4)
     #P3 = Point(C3)

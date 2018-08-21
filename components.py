@@ -22,9 +22,6 @@ class Component:
     def substitude_symbols(self,f):
         return f
 
-    def substitude_values(self,vi,x):
-        return vi;
-
     def get_symbol(self):
         return []
 
@@ -48,13 +45,14 @@ class FixPoint(Component):
         return self.position
 
     def plot(self,ax):
-        #print("Fixpoint at {}".format(self.get_position()))
         x,y = self.get_position().T
         ax.plot(x,y,'ok')
 
 
 
+
 class Point(Component):
+    """A mass point stationary on a Connector"""
     def __init__(self,parent,local=1,mass=1):
         self.parent=parent
         self.local = local
@@ -101,13 +99,11 @@ class Connector(Component):
     def l2g_expr(self,local): #local to global expression
         modifier = self.length*(self.offset+local)
         par_pos = self.parent.get_position_expr()
-        #print("l2g_expr: {}".format([par_pos[0]+modifier*sp.sin(self.q(self.t)),par_pos[1]-modifier*sp.cos(self.q(self.t))]))
         return [par_pos[0]+modifier*sp.sin(self.q(self.t)),par_pos[1]-modifier*sp.cos(self.q(self.t))]
     
     def plot(self,ax):
         x,y = np.array([self.l2g(0),self.l2g(1)]).T
         ax.plot(x,y,'-k')
-        #print("Connector from {} to {}".format(self.l2g(0),self.l2g(1)))
 
     def setup(self,i,t):
         self.index = i
@@ -121,10 +117,6 @@ class Connector(Component):
     def calculate_ode_functions(self,f,L):
         ODE = sp.diff(sp.diff(L,self.dq),self.t) - sp.diff(L,self.q(self.t)) 
         return f+[ODE]
-        
-    def substitude_values(self,vi,x):
-        res =  vi.subs(self.Q,x[2*self.index]).subs(self.dQ,x[2*self.index+1]);
-        return res
 
     def substitude_symbols(self,f):
         for i in range(len(f)):

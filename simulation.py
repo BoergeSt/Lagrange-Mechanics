@@ -10,7 +10,19 @@ from time import time
 
 from sympy.utilities.iterables import flatten
 
+import logging
 
+logger = logging.getLogger('Lagrange_Mechanics')
+logger.setLevel(logging.DEBUG)
+fh = logging.FileHandler('mechanics.log')
+fh.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
+logger.addHandler(fh)
+logger.addHandler(ch)
 
 
 class Simulation:
@@ -24,10 +36,12 @@ class Simulation:
         
         self.ax = self.fig.add_subplot(111,aspect='equal', autoscale_on=False, xlim=self.xlim, ylim=self.ylim)
         self.movie = movie
+        logger.debug("Simulation initiated.")
 
 
     def addObjects(self,objects):
         self.Objects.extend(objects)
+        logger.debug("Added objects")
 
     def plot(self):
         self.ax.cla()
@@ -39,10 +53,12 @@ class Simulation:
             object.plot(self.ax);
 
     def setup(self):
+        logger.debug("Starting setup")
         i = 0;
         t = sp.symbols('t')
         for object in self.Objects:
             i = object.setup(i,t)
+        logger.debug("Finished setup of {} objects with {} independent variables".format(len(self.Objects),i))
             
 
     
@@ -50,7 +66,7 @@ class Simulation:
         U = 0;
         for i,object in enumerate(self.Objects):
             Ui = object.potential_expr() 
-            print("Object {} has potential {}".format(i,Ui))
+            logger.debug("Object {} has potential {}".format(i,Ui))
             U += Ui
 
         return sp.simplify(U)
@@ -59,43 +75,30 @@ class Simulation:
         T = 0;
         for i,object in enumerate(self.Objects):
             Ti = object.kinetic_expr()
-            print("Object {} has kinetic Energy {}".format(i,Ti))
+            logger.debug("Object {} has kinetic Energy {}".format(i,Ti))
             T+=Ti
         return sp.simplify(T)
 
     def calculate_lagrange_expr(self):
         L = sp.simplify(self.calculate_kinetic_expr()-self.calculate_potential_expr())
-        print("Lagrange Function: L = {}".format(L))
+        logger.info("Lagrange Function:\n\tL = {}".format(L))
         return L
 
     def calculate_ode_functions(self,L):
         f = []
         for object in self.Objects:
-            #print("befor: {}".format(f))
             f = object.calculate_ode_functions(f,L)
-            #print("after: {}".format(f))
         for object in self.Objects:
             f = object.substitude_symbols(f)
 
         s = self.get_symbols()
         for i in range(len(s)):
             s[i]=s[i][2]
-        #print(s)
     
         rf = sp.solve(f,s)
-        #print(rf[s[0]].free_symbols)
         for i in range(len(f)):
             f[i]=rf[s[i]]
         return f;
-
-    def get_rhs(self,f,x):
-        res = []
-        for i in range(len(f)):
-            res.extend([x[2*i+1],f[i]])
-            for object in self.Objects:
-                res[2*i+1] = object.substitude_values(res[2*i+1],x);
-            #print("rhs[{}]={}\nrhs[{}]={}".format(2*i,res[2*i],2*i+1,res[2*i+1]))
-        return res
 
     def get_x0(self):
         x0 = []
@@ -119,43 +122,25 @@ class Simulation:
         self.setup()
         L = self.calculate_lagrange_expr()
         f = self.calculate_ode_functions(L)
-        #print(f)
-        #print(sim.get_symbols())
     
         s=self.get_symbols()
         for i in range(len(s)):
             s[i]=(s[i][0],s[i][1])
 
-        #fl = []
-        #for i,fi in enumerate(f):
-        #	fl.append(sp.lambdify(s,s[i][0]))
-        #	fl.append(sp.lambdify(s,fi))
-        #print(fl)
         f2 = []
         for i,fi in enumerate(f):
             f2.extend([s[i][1],fi])
-        print("ODE System: {}".format(f2))
+        logger.info("ODE System: \n\t{}".format("\n\t".join([str(o) for o in f2])))
         func = sp.lambdify(flatten(s),f2)
         rhs2 = lambda t,x: func(*x)
     
-
-
-    
-        #rhs = lambda t,x: sim.get_rhs(f,x)
         x0 = self.get_x0()
-        #print(x0)
-    
-        #t0 = time()
-        #rhs(0,x0)	
-        #t1 = time()
-        #print("rhs took {} ms".format(t1-t0))
-        #t0 = time()
-        #rhs2(0,x0)	
-        #t1 = time()
-        #print("rhs2 took {} ms".format(t1-t0))
+
     
         r = scipy.integrate.ode(rhs2).set_integrator('vode', method='bdf',with_jacobian=False) #bdf/adams
         r.set_initial_value(x0,0)
+
+        logger.debug("Initialized Integrator")
 
 
         def animate(i):
@@ -179,6 +164,7 @@ class Simulation:
         if self.movie:
             anim.save('lagrange.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
 
-
+        logger.debug("Starting animation")
         plt.show()
+        logger.debug("Finished animation")
         
