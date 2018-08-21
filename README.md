@@ -26,11 +26,11 @@ sim.run()
 
 
 ## Used Moduls
-*sympy: The main component of the program, since it allows symbolic calculations.
-*numpy: Used for some numerical calculations
-*scipy: Used for the numerical integration of the resulting ODEs and physical constants
-*matplotlib: Used for the display of the solution
-*time: Well... in order to measure some times...
+* sympy: The main component of the program, since it allows symbolic calculations.
+* numpy: Used for some numerical calculations
+* scipy: Used for the numerical integration of the resulting ODEs and physical constants
+* matplotlib: Used for the display of the solution
+* time: Well... in order to measure some times...
 
 
 
