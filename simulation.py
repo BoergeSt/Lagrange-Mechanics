@@ -135,6 +135,7 @@ class Simulation:
         rhs2 = lambda t,x: func(*x)
     
         x0 = self.get_x0()
+        logger.debug("x0 = {}".format(x0))
 
     
         r = scipy.integrate.ode(rhs2).set_integrator('vode', method='bdf',with_jacobian=False) #bdf/adams
