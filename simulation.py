@@ -26,12 +26,12 @@ logger.addHandler(ch)
 
 
 class Simulation:
-    def __init__(self,dt = 1./30,movie=False,subintegrations = 10):
+    def __init__(self,dt = 1./30,movie=False,subintegrations = 10,xlim = (-2,2),ylim=(-2,2)):
         self.dt = dt
         self.Objects = []
         self.fig = plt.figure(figsize=(20,10))
-        self.xlim = (-2,2)
-        self.ylim = (-2,2)
+        self.xlim = xlim
+        self.ylim = ylim
         self.subintegrations = subintegrations
         
         self.ax = self.fig.add_subplot(111,aspect='equal', autoscale_on=False, xlim=self.xlim, ylim=self.ylim)
@@ -87,9 +87,9 @@ class Simulation:
     def calculate_ode_functions(self,L):
         f = []
         for object in self.Objects:
-            f = object.calculate_ode_functions(f,L)
+            object.calculate_ode_functions(f,L)
         for object in self.Objects:
-            f = object.substitude_symbols(f)
+            object.substitude_symbols(f)
 
         s = self.get_symbols()
         for i in range(len(s)):

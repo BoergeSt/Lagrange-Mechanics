@@ -19,10 +19,10 @@ class Component:
         return 0
     
     def calculate_ode_functions(self,f,L):
-        return f
+        pass
 
     def substitude_symbols(self,f):
-        return f
+        pass
 
     def get_symbol(self):
         return []
@@ -152,12 +152,12 @@ class Trolley(Component):
 
     def calculate_ode_functions(self,f,L):
         ODE = sp.diff(sp.diff(L,self.dq),self.t) - sp.diff(L,self.q(self.t)) 
-        return f+[ODE]
+        f.append(ODE)
 
     def substitude_symbols(self,f):
         for i in range(len(f)):
             f[i] = f[i].subs(sp.diff(self.q(self.t),self.t,2),self.ddQ).subs(sp.diff(self.q(self.t),self.t),self.dQ).subs(self.q(self.t),self.Q)
-        return f
+        
 
     def get_symbol(self):
         return [(self.Q,self.dQ,self.ddQ)]
@@ -200,12 +200,12 @@ class Connector(Component):
 
     def calculate_ode_functions(self,f,L):
         ODE = sp.diff(sp.diff(L,self.dq),self.t) - sp.diff(L,self.q(self.t)) 
-        return f+[ODE]
+        f.append(ODE)
 
     def substitude_symbols(self,f):
         for i in range(len(f)):
             f[i] = f[i].subs(sp.diff(self.q(self.t),self.t,2),self.ddQ).subs(sp.diff(self.q(self.t),self.t),self.dQ).subs(self.q(self.t),self.Q)
-        return f
+        
 
     def get_symbol(self):
         return [(self.Q,self.dQ,self.ddQ)]
