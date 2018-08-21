@@ -1,6 +1,9 @@
 # Lagrange-Mechanics
 A simple Python program, which allows the automatic symbolic creation of the Lagrange equations for pendulums and similar objects. Furthermore a numerical solver is used in order to approximate the solutions.
 
+## Disclaimer
+I did this project out of curiosity and interest. I do not claim that any of the results are correct. Furthermore the numerical methods used in this program are not especially suitable for solving chaotic systems like the double pendulum. 
+
 ## Quick Start
 We build up the System we want to model using points and connectors. For example in case of the double pendulum we first need a reference point, where we fixate the first pendulum. This is done using the FixPoint Class.
 ```
@@ -21,6 +24,13 @@ sim.addObjects([Base, C1, P1, C2, P2])
 sim.run()
 ```
 
+
+## Used Moduls
+*sympy: The main component of the program, since it allows symbolic calculations.
+*numpy: Used for some numerical calculations
+*scipy: Used for the numerical integration of the resulting ODEs and physical constants
+*matplotlib: Used for the display of the solution
+*time: Well... in order to measure some times...
 
 
 
