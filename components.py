@@ -3,6 +3,8 @@ import numpy as np
 import sympy as sp
 import scipy.constants
 
+import matplotlib.pyplot as plt
+
 
 class Component:
     """Base Class for all Components"""
@@ -62,6 +64,22 @@ class FixLine(Component):
     def plot(self,ax):
         x,y = np.array([self.l2g(-10),self.l2g(10)]).T
         ax.plot(x,y,'-k')
+
+
+class FixCircle(Component):
+    def __init__(self,radius = 0.5,midpoint=np.array([0,0])):
+        self.midpoint = midpoint
+        self.radius = radius
+
+    def l2g(self,local):
+        return self.midpoint+self.radius*np.array([np.sin(local),-np.cos(local)])
+
+    def l2g_expr(self,local):
+        return [self.midpoint[0]+self.radius*sp.sin(local),self.midpoint[1]-self.radius*sp.cos(local)]
+
+    def plot(self,ax):
+        circle = plt.Circle(self.midpoint,self.radius,color = "black",fill=False)
+        ax.add_artist(circle)
 
 
 
