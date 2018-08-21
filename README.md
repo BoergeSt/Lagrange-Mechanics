@@ -33,4 +33,16 @@ sim.run()
 * time: Well... in order to measure some times...
 
 
+## Possible Scenarios and example implementations
 
+* Any kind of kombined mathematical pendulum like a double pendulum with varing string length and point mass. An example is implemented in double_pendulum.py and described in the quick start section.
+* A pendulum which is suspended from a trolley which can move freely on a static Line. An example of this is implemented in moving_pendulum.py
+* Reasonably well approximations of solid connectors with uniform density. This can be achieved by using a great number of points uniformly distributed on the connector. But since the actual kinetic energy is of second order in case of a single pendulum one can use an order 2 quadrature rule for better approximations. In fact the following 3 point quadrature rule can reproduce a single solid pendulum perfectly.
+```
+B = FixPoint()
+C = Connector(B)
+P0 = Point(C4,local = (1+np.sqrt(3/5))/2,mass=5/18)
+P1 = Point(C4,local = 1/2,mass=4/9)
+P2 = Point(C4,local = (1-np.sqrt(3/5))/2,mass=5/18)
+```
+* Any combination of the above
