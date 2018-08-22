@@ -29,7 +29,7 @@ sim.addObjects([Base, C1, P1, C2, P2])
 sim.run()
 ```
 
-##Implemented Classes
+## Implemented Classes
 
 There are by now a fair number of components from which one can build up a system. Basically they fall into two groups of components (the "FixGroup" and the "PhysicsGroup") which in turn can each be divided into two groups (the "0d" and "1d" objects):
 
