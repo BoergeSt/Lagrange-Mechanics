@@ -126,7 +126,7 @@ class Point(Component):
 
     def plot(self, ax, t=0):
         x,y = self.get_position(t).T
-        ax.plot(x,y,'or')
+        ax.plot(x,y,'og')
     
     def setup(self, i, t):
         self.t = t
@@ -294,7 +294,7 @@ class Spring(Component):
 
     def plot(self, ax, t=0):
         x,y = np.array([self.l2g(0,t),self.l2g(1,t)]).T
-        ax.plot(x,y,'-b')
+        ax.plot(x,y,'-y')
 
     def calculate_ode_functions(self,f,L):
         if not self.secondary_parent:
