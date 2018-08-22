@@ -60,7 +60,7 @@ class FixLine(Component):
         self.point1 = point1
         self.point2 = point2
 
-    def l2g(self,local):
+    def l2g(self,local,t=0):
         return (1-local)*self.point1+local*self.point2
 
     def l2g_expr(self,local):
@@ -72,18 +72,24 @@ class FixLine(Component):
 
 
 class FixCircle(Component):
-    def __init__(self,radius = 0.5,midpoint=np.array([0,0])):
+    def __init__(self,radius = 0.5,midpoint=np.array([0,0]),movable = False):
         self.midpoint = midpoint
         self.radius = radius
+        self.movable = movable
 
-    def l2g(self,local):
+    def l2g(self,local,t=0):
+        if self.movable:
+            return np.array([self.midpoint[0].subs(self.t,t)+self.radius*sp.sin(local),self.midpoint[1].subs(self.t,t)-self.radius*sp.cos(local)])
         return self.midpoint+self.radius*np.array([np.sin(local),-np.cos(local)])
 
     def l2g_expr(self,local):
         return [self.midpoint[0]+self.radius*sp.sin(local),self.midpoint[1]-self.radius*sp.cos(local)]
 
     def plot(self,ax,t=0):
-        circle = plt.Circle(self.midpoint,self.radius,color = "black",fill=False)
+        if self.movable:
+            circle = plt.Circle((self.midpoint[0].subs(self.t,t),self.midpoint[1].subs(self.t,t)),self.radius,color = "black",fill=False)
+        else:
+            circle = plt.Circle(self.midpoint,self.radius,color = "black",fill=False)
         ax.add_artist(circle)
 
 
@@ -136,14 +142,14 @@ class Trolley(Component):
         return i+1
 
     def get_position(self,t=0):
-        return self.parent.l2g(self.local)
+        return self.parent.l2g(self.local,t)
 
     def get_position_expr(self):
         return self.parent.l2g_expr(self.q(self.t))
 
     def plot(self,ax,t=0):
         #print("Point at {}".format(self.get_position()))
-        x,y = self.get_position().T
+        x,y = self.get_position(t).T
         ax.plot(x,y,'or')
 
     def potential_expr(self):

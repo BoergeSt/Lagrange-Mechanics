@@ -11,13 +11,18 @@ Base = FixPoint()
 ```
 After that we add a Connector to the FixPoint and give it an initial displacement or velocity.
 ```
-C1 = Component(Base,phi0=np.pi/4)
+C1 = Connector(Base,phi0=np.pi/4)
 ```
-Then we add a second but movable point to the end of the connector.
+Then we add a second but movable point to the end of the Connector.
 ```
 P1 = Point(C1)
 ```
-We repeat the last two steps once more to add the second pendulum. Finally we need to create a simulation class add all the created components and start the simulation.
+We repeat the last two steps once more to add the second pendulum.
+```
+C2 = Connector(P1)
+P2 = Point(C2)
+```
+Finally we need to create a simulation class add all the created components and start the simulation.
 ```
 sim = Simulation()
 sim.addObjects([Base, C1, P1, C2, P2])
@@ -34,11 +39,11 @@ sim.run()
 * logging: In order to log stuff
 
 
-## Possible Scenarios and example implementations
+## Possible Scenarios and Example Implementations
 
 * Any kind of kombined mathematical pendulum like a double pendulum with varing string length and point mass. An example is implemented in double_pendulum.py and described in the quick start section.
 * A pendulum which is suspended from a trolley which can move freely on a static Line or Circle. An example of this is implemented in moving_pendulum.py
-* A pendulum propelled by a FixPoint which is moving on a predefined Path. An example of this is implemented in moving_anchor.py (not fully tested)
+* A pendulum propelled by a FixPoint or FixCircle which is moving on a predefined Path. An example of this is implemented in moving_anchor.py
 * Reasonably well approximations of solid connectors with uniform density. This can be achieved by using a great number of points uniformly distributed on the connector. But since the actual kinetic energy is of second order in case of a single pendulum one can use an order 2 quadrature rule for better approximations. In fact the following 3 point quadrature rule can reproduce a single solid pendulum perfectly.
 ```
 B = FixPoint()
