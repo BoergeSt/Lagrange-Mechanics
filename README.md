@@ -1,11 +1,11 @@
 # Lagrange-Mechanics
-A simple Python program, which allows the automatic symbolic creation of the Lagrange equations for pendulums and similar objects. Furthermore a numerical solver is used in order to approximate the solutions.
+A simple Python3 program, which allows the automatic symbolic creation of the Lagrange equations for pendulums and similar objects. Furthermore a numerical solver is used in order to approximate the solutions.
 
 ## Disclaimer
 I did this project out of curiosity and interest. I do not claim that any of the results are correct. Furthermore the numerical methods used in this program are not especially suitable for solving chaotic systems like the double pendulum. 
 
 ## Quick Start
-We build up the System we want to model using points and connectors. For example in case of the double pendulum we first need a reference point, where we fixate the first pendulum. This is done using the FixPoint Class.
+We build up the system we want to model using points and connectors. For example in case of the double pendulum we first need a reference point, where we fixate the first pendulum. This is done using the FixPoint Class.
 ```
 Base = FixPoint()
 ```
@@ -48,3 +48,9 @@ P1 = Point(C4,local = 1/2,mass=4/9)
 P2 = Point(C4,local = (1-np.sqrt(3/5))/2,mass=5/18)
 ```
 * Any combination of the above
+
+## Stuff That May or May nNot Be Implemented in the Future
+
+* Springs as Connectors
+* Inequality Restraints (if I can figure out a way to do that). For example a trolley that can only move on a finite line which has kind of a stopper at the end. (I don't think anything like a bounce back can be implemented using the lagrange formalism. Yet if you know a way to do that, please let me know.)
+* Using Circles at the end of a connector to which trolleys or points can be connected
