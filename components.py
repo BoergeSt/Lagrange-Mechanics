@@ -9,29 +9,44 @@ import matplotlib.pyplot as plt
 class Component:
     """Base Class for all Components"""
 
-    def setup(self,i,t):
+    def setup(self, i, t):
+        """The setup function sets up the Component for later use in the simulation. Must be called before any other function.
+        
+        The setup enumerates the degrees of freedom such that no collisions between them occur in symbolic calculations. It is called from the Simulation::setup function.
+        """
+        
         self.t = t
         return i
 
     def potential_expr(self):
-        return 0
+        """Gives back the potential energy expression for the current component."""
+        
+        return sympy.Integer(0)
 
     def kinetic_expr(self):
-        return 0
+        """Gives back the kinetic energy for the current component."""
+
+        return sympy.Integer(0)
     
-    def calculate_ode_functions(self,f,L):
+    def calculate_ode_functions(self, f, L):
+        """Calculates the second order odes corresponding to the inner degrees of freedom from the Lagrange Function and adds them to the f array."""
+
         pass
 
-    def substitude_symbols(self,f):
+    def substitude_symbols(self, f):
+        """Exchanges the implicit time dependency of the DOFs by symbols"""
         pass
 
     def get_symbol(self):
+        """Returns all used symbols corresponding to this Component"""
         return []
 
-    def get_x0(self,x0):
+    def get_x0(self, x0):
+        """fills the array x0 with the initial conditions"""
         pass
 
-    def update(self,x):
+    def update(self, x):
+        """updates the current values of the degrees of freedom corresponding to this component form the array x"""
         pass
 
 
@@ -39,11 +54,11 @@ class Component:
     
 class FixPoint(Component):
     """A non moving Point object to anchor other objects"""
-    def __init__(self,position=np.array([0,0]),moving = False):
+    def __init__(self, position=np.array([0,0]), moving = False):
         self.position = position
         self.moving = moving
 
-    def get_position(self,t=0):
+    def get_position(self, t=0):
         if self.moving:
             return np.array([self.position[0].subs(self.t,t),self.position[1].subs(self.t,t)])
         return self.position
@@ -51,43 +66,45 @@ class FixPoint(Component):
     def get_position_expr(self):
         return self.position
 
-    def plot(self,ax,t=0):
+    def plot(self, ax, t=0):
         x,y = self.get_position(t).T
         ax.plot(x,y,'ok')
 
 class FixLine(Component):
-    def __init__(self,point1=np.array([0,0]),point2=np.array([1,0])):
+    """A fixed linear track on which a Trolley can move"""
+    def __init__(self, point1=np.array([0,0]), point2=np.array([1,0])):
         self.point1 = point1
         self.point2 = point2
 
-    def l2g(self,local,t=0):
+    def l2g(self, local, t=0):
         return (1-local)*self.point1+local*self.point2
 
-    def l2g_expr(self,local):
+    def l2g_expr(self, local):
         return self.l2g(local)
 
-    def plot(self,ax,t=0):
-        x,y = np.array([self.l2g(-10),self.l2g(10)]).T
+    def plot(self, ax, t=0):
+        x,y = np.array([self.l2g(-10), self.l2g(10)]).T
         ax.plot(x,y,'-k')
 
 
 class FixCircle(Component):
-    def __init__(self,radius = 0.5,midpoint=np.array([0,0]),movable = False):
+    """A fixed circular crack on which a Trolley can move"""
+    def __init__(self, radius = 0.5, midpoint=np.array([0,0]), movable = False):
         self.midpoint = midpoint
         self.radius = radius
         self.movable = movable
 
-    def l2g(self,local,t=0):
+    def l2g(self, local, t=0):
         if self.movable:
             return np.array([self.midpoint[0].subs(self.t,t)+self.radius*sp.sin(local),self.midpoint[1].subs(self.t,t)-self.radius*sp.cos(local)])
         return self.midpoint+self.radius*np.array([np.sin(local),-np.cos(local)])
 
-    def l2g_expr(self,local):
-        return [self.midpoint[0]+self.radius*sp.sin(local),self.midpoint[1]-self.radius*sp.cos(local)]
+    def l2g_expr(self, local):
+        return [self.midpoint[0]+self.radius*sp.sin(local), self.midpoint[1]-self.radius*sp.cos(local)]
 
-    def plot(self,ax,t=0):
+    def plot(self, ax, t=0):
         if self.movable:
-            circle = plt.Circle((self.midpoint[0].subs(self.t,t),self.midpoint[1].subs(self.t,t)),self.radius,color = "black",fill=False)
+            circle = plt.Circle((self.midpoint[0].subs(self.t,t), self.midpoint[1].subs(self.t,t)), self.radius,color = "black",fill=False)
         else:
             circle = plt.Circle(self.midpoint,self.radius,color = "black",fill=False)
         ax.add_artist(circle)
@@ -96,22 +113,22 @@ class FixCircle(Component):
 
 class Point(Component):
     """A mass point stationary on a Connector"""
-    def __init__(self,parent,local=1,mass=1):
+    def __init__(self, parent, local=1, mass=1):
         self.parent=parent
         self.local = local
         self.mass = mass
         
-    def get_position(self,t=0):
+    def get_position(self, t=0):
         return self.parent.l2g(self.local,t)
 
     def get_position_expr(self):
         return self.parent.l2g_expr(self.local)
 
-    def plot(self,ax,t=0):
+    def plot(self, ax, t=0):
         x,y = self.get_position(t).T
         ax.plot(x,y,'or')
     
-    def setup(self,i,t):
+    def setup(self, i, t):
         self.t = t
         return i
 
@@ -120,20 +137,20 @@ class Point(Component):
 
     def kinetic_expr(self):
         pos = self.get_position_expr()
-        v = [sp.diff(pos[0],self.t),sp.diff(pos[1],self.t)]
+        v = [sp.diff(pos[0], self.t), sp.diff(pos[1],self.t)]
         return 0.5*self.mass*(v[0]**2+v[1]**2)
 
     
 class Trolley(Component):
     """A mass point moving on a FixLine"""
-    def __init__(self,parent,loc0=0,dloc0=0,mass=1):
+    def __init__(self, parent, loc0=0, dloc0=0, mass=1):
         self.parent=parent
         self.mass = mass
         self.loc0 = loc0
         self.dloc0 = dloc0
         self.local = loc0
         
-    def setup(self,i,t):
+    def setup(self, i, t):
         self.index = i
         self.q=sp.Function('q{}'.format(i))
         self.dq = sp.diff(self.q(t),t)
@@ -141,14 +158,13 @@ class Trolley(Component):
         self.Q,self.dQ,self.ddQ = sp.symbols('Q{0} dQ{0} ddQ{0}'.format(self.index))
         return i+1
 
-    def get_position(self,t=0):
+    def get_position(self, t=0):
         return self.parent.l2g(self.local,t)
 
     def get_position_expr(self):
         return self.parent.l2g_expr(self.q(self.t))
 
-    def plot(self,ax,t=0):
-        #print("Point at {}".format(self.get_position()))
+    def plot(self, ax, t=0):
         x,y = self.get_position(t).T
         ax.plot(x,y,'or')
 
@@ -160,26 +176,26 @@ class Trolley(Component):
         v = [sp.diff(pos[0],self.t),sp.diff(pos[1],self.t)]
         return 0.5*self.mass*(v[0]**2+v[1]**2)
 
-    def calculate_ode_functions(self,f,L):
+    def calculate_ode_functions(self, f, L):
         ODE = sp.diff(sp.diff(L,self.dq),self.t) - sp.diff(L,self.q(self.t)) 
         f.append(ODE)
 
-    def substitude_symbols(self,f):
+    def substitude_symbols(self, f):
         for i in range(len(f)):
             f[i] = f[i].subs(sp.diff(self.q(self.t),self.t,2),self.ddQ).subs(sp.diff(self.q(self.t),self.t),self.dQ).subs(self.q(self.t),self.Q)
         
 
     def get_symbol(self):
-        return [(self.Q,self.dQ,self.ddQ)]
+        return [(self.Q, self.dQ, self.ddQ)]
 
-    def get_x0(self,x0):
-        x0.extend([self.loc0,self.dloc0])
+    def get_x0(self, x0):
+        x0.extend([self.loc0, self.dloc0])
 
-    def update(self,x):
+    def update(self, x):
         self.local = x[2*self.index]
 
 class Connector(Component):
-    def __init__(self,parent,length=1,offset = 0,phi0 = 0, dphi0 = 0):
+    def __init__(self, parent, length=1, offset = 0,phi0 = 0, dphi0 = 0):
         self.parent = parent
         self.length = length
         self.offset = offset
@@ -188,7 +204,7 @@ class Connector(Component):
         self.phi = phi0
 
 
-    def setup(self,i,t):
+    def setup(self, i, t):
         self.index = i
         self.q=sp.Function('q{}'.format(i))
         self.dq = sp.diff(self.q(t),t)
@@ -196,15 +212,15 @@ class Connector(Component):
         self.Q,self.dQ,self.ddQ = sp.symbols('Q{0} dQ{0} ddQ{0}'.format(self.index))
         return i+1
 
-    def l2g(self,local,t=0): #local to global
+    def l2g(self, local, t=0): #local to global
         return self.parent.get_position(t)+self.length*(self.offset+local)*np.array([np.sin(self.phi),-np.cos(self.phi)])
 
-    def l2g_expr(self,local): #local to global expression
+    def l2g_expr(self, local): #local to global expression
         modifier = self.length*(self.offset+local)
         par_pos = self.parent.get_position_expr()
         return [par_pos[0]+modifier*sp.sin(self.q(self.t)),par_pos[1]-modifier*sp.cos(self.q(self.t))]
     
-    def plot(self,ax,t=0):
+    def plot(self, ax, t=0):
         x,y = np.array([self.l2g(0,t),self.l2g(1,t)]).T
         ax.plot(x,y,'-k')
 
@@ -212,16 +228,16 @@ class Connector(Component):
         ODE = sp.diff(sp.diff(L,self.dq),self.t) - sp.diff(L,self.q(self.t)) 
         f.append(ODE)
 
-    def substitude_symbols(self,f):
+    def substitude_symbols(self, f):
         for i in range(len(f)):
             f[i] = f[i].subs(sp.diff(self.q(self.t),self.t,2),self.ddQ).subs(sp.diff(self.q(self.t),self.t),self.dQ).subs(self.q(self.t),self.Q)
         
 
     def get_symbol(self):
-        return [(self.Q,self.dQ,self.ddQ)]
+        return [(self.Q, self.dQ, self.ddQ)]
 
-    def get_x0(self,x0):
-        x0.extend([self.phi0,self.dphi0])
+    def get_x0(self, x0):
+        x0.extend([self.phi0, self.dphi0])
 
-    def update(self,x):
+    def update(self, x):
         self.phi = x[2*self.index]
