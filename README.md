@@ -111,7 +111,7 @@ from simulation import Simulation
 import numpy as np
 import sympy as sp
 
-sim = Simulation(movie=False)
+sim = Simulation()
 
 trace = [0.1*sp.sin(3*sim.t),sp.Integer(0)]
 Base = FixPoint(moving=True, position=trace)
@@ -120,6 +120,29 @@ C1 = Connector(Base)
 P1 = Point(C1)
 
 sim.addObjects([Base,C1,P1])
+sim.run()
+
+```
+
+### Pendulum Freely Moving on a Circle
+
+This time we don't want the base to be moving in a predetermined way, but to be freely movable on a circle. This can be done using the Trolley in combination with the FixCircl class.
+
+```python
+from components import Connector, Point, FixCircle, Trolley
+from simulation import Simulation
+
+import numpy as np
+import sympy as sp
+
+sim = Simulation()
+
+Base = FixCircle(1/4)
+T1 = Trolley(Base)
+C1 = Connector(T1,phi0 = np.pi/4)
+P1 = Point(C1)
+sim.addObjects([Base,T1,C1,P1])
+
 sim.run()
 
 ```
