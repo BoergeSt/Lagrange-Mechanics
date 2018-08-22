@@ -50,7 +50,7 @@ There are by now a fair number of components from which one can build up a syste
 There are some rules for the assembly of a system:
 * Components from the FixGroup can not be attached to another object yet other objects can be attached to them.
 * Components from the PhysicsGroup must be attached to exactly one other already existing component. Exception: The spring *can* be attached to two different components.
-* 1d components always attach to 0d components and vise versa.
+* 1d components always attach to 0d components and vice versa.
 
 Warning:
 * Even though you can technically connect a Trolley to a Connector or even Spring, there is currently nothing stoping the trolley from moving along the infinite line spaned by it.
