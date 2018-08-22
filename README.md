@@ -30,6 +30,7 @@ sim.run()
 ```
 
 ##Implemented Classes
+
 There are by now a fair number of components from which one can build up a system. Basically they fall into two groups of components (the "FixGroup" and the "PhysicsGroup") which in turn can each be divided into two groups (the "0d" and "1d" objects):
 
 * FixGroup:
@@ -50,6 +51,31 @@ There are some rules for the assembly of a system:
 * Components from the FixGroup can not be attached to another object yet other objects can be attached to them.
 * Components from the PhysicsGroup must be attached to exactly one other already existing component. Exception: The spring *can* be attached to two different components.
 * 1d components always attach to 0d components and vise versa.
+
+Warning:
+* Even though you can technically connect a Trolley to a Connector or even Spring, there is currently nothing stoping the trolley from moving along the infinite line spaned by it.
+
+## Example Systems
+
+### A Single Pendulum
+
+The Basis for any System is at least one element of the FixGroup. In this case we only need a point from which the pendulum can be suspended. Then we attache the "String" to this Point which has to be a 1D object from the physics group according to the previously mentioned construction rules. Therefore we can use either the Connector or the spring. Since we do not want the "String" to change length, we choose the Connector. At the end of the Connector we need to put a weight. According to the rules we need to take a 0d physics object. Since we want to stick the mass to the end of the connector and it is supposed to stay there (and not move along the connector), we take the Point. Finally we have to think about the initial conditions under which we want to calculate the system. In this case we want the pendulum to have an initial displacement of pi/4 but no initial velocity.
+
+```
+from components import Connector, Point, FixPoint
+from simulation import Simulation
+
+sim = Simulation()
+
+Base = FixPoint()
+C1 = Connector(Base, phi0 = np.pi/4)
+P1 = Point(C1)
+sim.addObjects([Base, C1, P1])
+
+sim.run()
+```
+
+
 
 
 
@@ -75,6 +101,7 @@ P2 = Point(C4,local = (1-np.sqrt(3/5))/2,mass=5/18)
 Likely:
 * Connectors with predetermined variing length
 * Using Circles at the end of a connector to which trolleys or points can be connected
+* A free particel
 
 Possibly (meaning if I have enough time and motivation... and if I can figure out how to do this):
 * Energy loss due to friction (Rayleigh dissipation function)
