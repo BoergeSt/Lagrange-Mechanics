@@ -1,5 +1,5 @@
 # Lagrange-Mechanics
-A simple Python3 program, which allows the automatic symbolic creation of the Lagrange equations for pendulums and similar objects. Furthermore a numerical solver is used in order to approximate the solutions.
+A simple Python3 program, which allows the automatic symbolic creation of the Lagrange equations for pendulums and similar objects. It features a very simple way to set up even complex systems. Afterwards the system can be viewed in (close to) realtime, depending on the complexity of the system or recorded and saved as an mp4.
 
 ## Disclaimer
 I did this project out of curiosity and interest. I do not claim that any of the results are correct. Furthermore the numerical methods used in this program are not especially suitable for solving chaotic systems like the double pendulum. 
@@ -38,6 +38,8 @@ sim.run()
 * time: Well... in order to measure some times...
 * logging: In order to log stuff
 
+Additionally you will need FFmpeg if you want to save the animation as a movie.
+
 
 ## Possible Scenarios and Example Implementations
 
@@ -64,3 +66,8 @@ Possibly (meaning if I have enough time and motivation... and if I can figure ou
 * Energy loss due to friction (Rayleigh dissipation function)
 * Inequality Restraints (if I can figure out a way to do that). For example a trolley that can only move on a finite line which has kind of a stopper at the end. (I don't think anything like a bounce back can be implemented using the lagrange formalism. Yet if you know a way to do that, please let me know.)
 * If I become really bored I might add a GUI such that you can assamble your system graphically and change the parameters on the fly.
+
+Maybe (mainly inner workings you probably won't notice):
+* Possibility of different general Potential functions.
+* Error handling
+* Performance improvements such that even complex systems can be viewed in (nearly) realtime
