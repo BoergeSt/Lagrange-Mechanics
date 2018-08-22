@@ -75,7 +75,26 @@ sim.addObjects([Base, C1, P1])
 sim.run()
 ```
 
+### The Double Pendulum
 
+There is really nothing more to single pendulum except that you can of course change the mass and the length of the components.
+```
+from components import Connector, Point, FixPoint
+from simulation import Simulation
+
+sim = Simulation()
+
+Base = FixPoint()
+C1 = Connector(Base, phi0 = np.pi/4)
+P1 = Point(C1)
+sim.addObjects([Base, C1, P1])
+
+C2 = Connector(Base, length = 0.5)
+P1 = Point(C2, mass = 2)
+sim.addObjects([C2, P2])
+
+sim.run()
+```
 
 
 
