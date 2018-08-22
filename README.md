@@ -54,8 +54,12 @@ P2 = Point(C4,local = (1-np.sqrt(3/5))/2,mass=5/18)
 ```
 * Any combination of the above
 
-## Stuff That May or May nNot Be Implemented in the Future
-
+## Stuff That May or May Not Be Implemented in the Future
+Likely:
+* Connectors with predetermined variing length
 * Springs as Connectors
-* Inequality Restraints (if I can figure out a way to do that). For example a trolley that can only move on a finite line which has kind of a stopper at the end. (I don't think anything like a bounce back can be implemented using the lagrange formalism. Yet if you know a way to do that, please let me know.)
 * Using Circles at the end of a connector to which trolleys or points can be connected
+Possibly (meaning if I have enough time and motivation... and if I can figure out how to do this):
+* Energy loss due to friction (Rayleigh dissipation function)
+* Inequality Restraints (if I can figure out a way to do that). For example a trolley that can only move on a finite line which has kind of a stopper at the end. (I don't think anything like a bounce back can be implemented using the lagrange formalism. Yet if you know a way to do that, please let me know.)
+* If I become really bored I might add a GUI such that you can assamble your system graphically and change the parameters on the fly.
