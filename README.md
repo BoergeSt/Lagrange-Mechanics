@@ -29,16 +29,29 @@ sim.addObjects([Base, C1, P1, C2, P2])
 sim.run()
 ```
 
+##Implemented Classes
+There are by now a fair number of components from which one can build up a system. Basically they fall into two groups of components (the "FixGroup" and the "PhysicsGroup") which in turn can each be divided into two groups (the "0d" and "1d" objects):
 
-## Used Moduls
-* sympy: The main component of the program, since it allows symbolic calculations.
-* numpy: Used for some numerical calculations
-* scipy: Used for the numerical integration of the resulting ODEs and physical constants
-* matplotlib: Used for the display of the solution
-* time: Well... in order to measure some times...
-* logging: In order to log stuff
+* FixGroup:
+  * 0d:
+    * FixPoint: Is a point which can be stationary or moving along a predetermined path.
+  * 1d:
+    * FixLine: An "infinite" Line similar to the FixPoint
+    * FixCircle: Like the FixLine but circular. It can also move along predetermined paths.
+* PhysicsGroup:
+  * 0d:
+    * Point: A point which carries a mass. It keeps stationary on the local coordinates of the 1d object it is attached to.
+    * Trolley: Like the Point it caries a mass. Additionally it can move freely on the 1d object it is attached to.
+  * 1d:
+    * Connector: A "finite" line of constant length, which can rotate freely around the point it is connected to.
+    * Spring: Like a connector but with variable length, which in turn will create a potential following Hooke's law. It can either have 2 Degrees of freedom (it's rotation and length) if it has one "parent" object or 0 DOFS it is has two parents.
 
-Additionally you will need FFmpeg if you want to save the animation as a movie.
+There are some rules for the assembly of a system:
+* Components from the FixGroup can not be attached to another object yet other objects can be attached to them.
+* Components from the PhysicsGroup must be attached to exactly one other already existing component. Exception: The spring *can* be attached to two different components.
+* 1d components always attach to 0d components and vise versa.
+
+
 
 
 ## Possible Scenarios and Example Implementations
@@ -72,3 +85,14 @@ Maybe (mainly inner workings you probably won't notice):
 * Possibility of different general Potential functions.
 * Error handling
 * Performance improvements such that even complex systems can be viewed in (nearly) realtime
+
+
+## Used Moduls
+* sympy: The main component of the program, since it allows symbolic calculations.
+* numpy: Used for some numerical calculations
+* scipy: Used for the numerical integration of the resulting ODEs and physical constants
+* matplotlib: Used for the display of the solution
+* time: Well... in order to measure some times...
+* logging: In order to log stuff
+
+Additionally you will need FFmpeg if you want to save the animation as a movie.
