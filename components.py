@@ -89,13 +89,13 @@ class FixLine(Component):
 
 class FixCircle(Component):
     """A fixed circular crack on which a Trolley can move"""
-    def __init__(self, radius = 0.5, midpoint=np.array([0,0]), movable = False):
+    def __init__(self, radius = 0.5, midpoint=np.array([0,0]), moving = False):
         self.midpoint = midpoint
         self.radius = radius
-        self.movable = movable
+        self.moving = moving
 
     def l2g(self, local, t=0):
-        if self.movable:
+        if self.moving:
             return np.array([self.midpoint[0].subs(self.t,t)+self.radius*sp.sin(local),self.midpoint[1].subs(self.t,t)-self.radius*sp.cos(local)])
         return self.midpoint+self.radius*np.array([np.sin(local),-np.cos(local)])
 
@@ -103,7 +103,7 @@ class FixCircle(Component):
         return [self.midpoint[0]+self.radius*sp.sin(local), self.midpoint[1]-self.radius*sp.cos(local)]
 
     def plot(self, ax, t=0):
-        if self.movable:
+        if self.moving:
             circle = plt.Circle((self.midpoint[0].subs(self.t,t), self.midpoint[1].subs(self.t,t)), self.radius,color = "black",fill=False)
         else:
             circle = plt.Circle(self.midpoint,self.radius,color = "black",fill=False)
