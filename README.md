@@ -61,9 +61,11 @@ Warning:
 
 The Basis for any System is at least one element of the FixGroup. In this case we only need a point from which the pendulum can be suspended. Then we attache the "String" to this Point which has to be a 1D object from the physics group according to the previously mentioned construction rules. Therefore we can use either the Connector or the spring. Since we do not want the "String" to change length, we choose the Connector. At the end of the Connector we need to put a weight. According to the rules we need to take a 0d physics object. Since we want to stick the mass to the end of the connector and it is supposed to stay there (and not move along the connector), we take the Point. Finally we have to think about the initial conditions under which we want to calculate the system. In this case we want the pendulum to have an initial displacement of pi/4 but no initial velocity.
 
-```
+```python
 from components import Connector, Point, FixPoint
 from simulation import Simulation
+
+import numpy as np
 
 sim = Simulation()
 
@@ -78,9 +80,11 @@ sim.run()
 ### The Double Pendulum
 
 There is really nothing more to single pendulum except that you can of course change the mass and the length of the components.
-```
+```python
 from components import Connector, Point, FixPoint
 from simulation import Simulation
+
+import numpy as np
 
 sim = Simulation()
 
@@ -96,6 +100,29 @@ sim.addObjects([C2, P2])
 sim.run()
 ```
 
+### Pendulum with Moving Base
+
+This time instead of using an initial displacement or velocity we stimulate the system by moving the base of the pendulum sin-like to the left and right. This is done by setting the moving parameter to True, and using a sympy term with sim.t as variable instead of number for the components of the position.
+
+```python
+from components import Connector, Point, FixPoint
+from simulation import Simulation
+
+import numpy as np
+import sympy as sp
+
+sim = Simulation(movie=False)
+
+trace = [0.1*sp.sin(3*sim.t),sp.Integer(0)]
+Base = FixPoint(moving=True, position=trace)
+
+C1 = Connector(Base)
+P1 = Point(C1)
+
+sim.addObjects([Base,C1,P1])
+sim.run()
+
+```
 
 
 
