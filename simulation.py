@@ -53,7 +53,7 @@ class Simulation:
         for object in self.Objects:
             object.plot(self.ax,t) 
 
-    def setup(self):
+    def setup(self): #TODO: can fail if objects are in wrong order
         logger.debug("Starting setup")
         i = 0 
         for object in self.Objects:
@@ -95,9 +95,15 @@ class Simulation:
         for i in range(len(s)):
             s[i]=s[i][2]
     
+        logger.debug("cuppled ode: {}".format(f))
         rf = sp.solve(f,s)
+        logger.debug("solver returned: {}".format(rf))
         for i in range(len(f)):
-            f[i]=rf[s[i]]
+            try:
+                f[i] = rf[s[i]]
+            except KeyError:
+                f[i] = sp.Integer(0)
+                logger.warning("Symbol {} not found in solution. Setting it to 0".format(s[i]))
         return f 
 
     def get_x0(self):

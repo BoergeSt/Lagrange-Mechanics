@@ -21,12 +21,12 @@ class Component:
     def potential_expr(self):
         """Gives back the potential energy expression for the current component."""
         
-        return sympy.Integer(0)
+        return sp.Integer(0)
 
     def kinetic_expr(self):
         """Gives back the kinetic energy for the current component."""
 
-        return sympy.Integer(0)
+        return sp.Integer(0)
     
     def calculate_ode_functions(self, f, L):
         """Calculates the second order odes corresponding to the inner degrees of freedom from the Lagrange Function and adds them to the f array."""
@@ -54,8 +54,8 @@ class Component:
     
 class FixPoint(Component):
     """A non moving Point object to anchor other objects"""
-    def __init__(self, position=np.array([0,0]), moving = False):
-        self.position = position
+    def __init__(self, position=[0,0], moving = False):
+        self.position = np.array(position)
         self.moving = moving
 
     def get_position(self, t=0):
@@ -241,3 +241,96 @@ class Connector(Component):
 
     def update(self, x):
         self.phi = x[2*self.index]
+
+
+class Spring(Component):
+    def __init__(self, parent, secondary_parent = False, length = 1, k=1, x0 = 0, dx0 = 0, phi0 = 0, dphi0 = 0):
+        self.parent = parent
+        self.secondary_parent = secondary_parent 
+        self.length = length
+        self.x0 = x0 
+        self.dx0 = dx0
+        self.x = x0
+        self.phi0 = phi0
+        self.dphi0 = dphi0
+        self.phi = phi0
+        self.k = k
+
+    def setup(self, i, t):
+        self.t = t
+        if not self.secondary_parent:
+            self.x_index = i
+            self.q1=sp.Function('q{}'.format(self.x_index))
+            self.dq1 = sp.diff(self.q1(t),t)
+            self.Q1,self.dQ1,self.ddQ1 = sp.symbols('Q{0} dQ{0} ddQ{0}'.format(self.x_index))
+            i += 1;
+
+            self.phi_index = i
+            self.q2=sp.Function('q{}'.format(self.phi_index))
+            self.dq2 = sp.diff(self.q2(t),t)
+            self.Q2,self.dQ2,self.ddQ2 = sp.symbols('Q{0} dQ{0} ddQ{0}'.format(self.phi_index))
+            i += 1
+        #else:
+        #    vec = self.parent.get_position()-self.secondary_parent.get_position()
+        #    self.x0 = np.linalg.norm(vec)-self.length
+        #    self.phi0 = np.arctan2(-vec[0],vec[1])
+        #    self.x = self.x0
+        #    self.phi = self.phi0
+        return i
+
+    def l2g(self, local, t=0):
+        if not self.secondary_parent:
+            return self.parent.get_position(t)+(self.length+self.x)*(local)*np.array([np.sin(self.phi),-np.cos(self.phi)])
+        return (1-local)*self.parent.get_position(t)+local*self.secondary_parent.get_position(t)
+
+    def l2g_expr(self, local):
+        par_pos = self.parent.get_position_expr()
+        if not self.secondary_parent:
+            modifier = (self.length+self.q1(self.t))*local
+            return [par_pos[0]+modifier*sp.sin(self.q2(self.t)),par_pos[1]-modifier*sp.cos(self.q2(self.t))]
+        par_pos2 = self.secondary_parent.get_position_expr()
+        return [(1-local)*par_pos[0]+local*par_pos2[0], (1-local)*par_pos[1]+local*par_pos2[1]]
+    
+
+    def plot(self, ax, t=0):
+        x,y = np.array([self.l2g(0,t),self.l2g(1,t)]).T
+        ax.plot(x,y,'-b')
+
+    def calculate_ode_functions(self,f,L):
+        if not self.secondary_parent:
+            ODE = sp.diff(sp.diff(L,self.dq1),self.t) - sp.diff(L,self.q1(self.t)) 
+            f.append(ODE)
+            ODE = sp.diff(sp.diff(L,self.dq2),self.t) - sp.diff(L,self.q2(self.t))
+            f.append(ODE)
+
+    def substitude_symbols(self, f):
+        if not self.secondary_parent:
+            for i in range(len(f)):
+                f[i] = f[i].subs(sp.diff(self.q1(self.t),self.t,2),self.ddQ1).subs(sp.diff(self.q1(self.t),self.t),self.dQ1).subs(self.q1(self.t),self.Q1)
+                f[i] = f[i].subs(sp.diff(self.q2(self.t),self.t,2),self.ddQ2).subs(sp.diff(self.q2(self.t),self.t),self.dQ2).subs(self.q2(self.t),self.Q2)
+        
+
+    def get_symbol(self):
+        s=[]
+        if not self.secondary_parent:
+            s.append((self.Q1, self.dQ1, self.ddQ1))
+            s.append((self.Q2, self.dQ2, self.ddQ2))
+        return s
+
+    def get_x0(self, x0):
+        if not self.secondary_parent:
+            x0.extend([self.x0, self.dx0])
+            x0.extend([self.phi0, self.dphi0])
+
+    def update(self, x):
+        if not self.secondary_parent:
+            self.x = x[2*self.x_index]
+            self.phi = x[2*self.phi_index]
+
+    def potential_expr(self):
+        if not self.secondary_parent:
+            return sp.Rational(1,2)*self.k*self.q1(self.t)**2
+        pos1 = self.parent.get_position_expr()
+        pos2 = self.secondary_parent.get_position_expr()
+        x = sp.sqrt((pos1[0]-pos2[0])**2+(pos1[1]-pos2[1])**2)
+        return sp.Rational(1,2)*self.k*x**2
