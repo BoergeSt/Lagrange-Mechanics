@@ -2,15 +2,15 @@ from components import Connector, Point, FixLine, FixCircle, Trolley
 from simulation import Simulation
 
 import numpy as np
-
+import sympy as sp
 
 if __name__=="__main__":
     sim = Simulation(movie=False)
-    
-   
+
     #Base = FixLine()
     #Base = FixLine(point2 = np.array([1,.01]))
-    Base = FixCircle(1/4)
+    trace = [0.3*sp.sin(2*sim.t),sp.Integer(0)]
+    Base = FixCircle(1/4,midpoint=trace,movable=True)
     T1 = Trolley(Base,np.pi,mass = 10)
     C1 = Connector(T1,phi0 = 8/9*np.pi)
     P1 = Point(C1)
