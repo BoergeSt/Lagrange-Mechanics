@@ -59,6 +59,7 @@ Likely:
 * Connectors with predetermined variing length
 * Springs as Connectors
 * Using Circles at the end of a connector to which trolleys or points can be connected
+
 Possibly (meaning if I have enough time and motivation... and if I can figure out how to do this):
 * Energy loss due to friction (Rayleigh dissipation function)
 * Inequality Restraints (if I can figure out a way to do that). For example a trolley that can only move on a finite line which has kind of a stopper at the end. (I don't think anything like a bounce back can be implemented using the lagrange formalism. Yet if you know a way to do that, please let me know.)
