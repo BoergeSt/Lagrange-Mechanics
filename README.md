@@ -1,5 +1,5 @@
 # Lagrange-Mechanics
-A simple Python3 program, which allows the automatic symbolic creation of the Lagrange equations for pendulums and similar objects. It features a very simple way to set up even complex systems. Afterwards the system can be viewed in (close to) realtime, depending on the complexity of the system or recorded and saved as an mp4.
+A simple Python3 program, which allows the automatic symbolic creation of the Lagrange equations for systems containing pendulums, springs and similar objects. It features a very simple way to set up even complex systems. Afterwards the system can be viewed in (close to) realtime, depending on the complexity of the system or recorded and saved as an mp4.
 
 ## Disclaimer
 I did this project out of curiosity and interest. I do not claim that any of the results are correct. Furthermore the numerical methods used in this program are not especially suitable for solving chaotic systems like the double pendulum. 
@@ -44,8 +44,10 @@ Additionally you will need FFmpeg if you want to save the animation as a movie.
 ## Possible Scenarios and Example Implementations
 
 * Any kind of kombined mathematical pendulum like a double pendulum with varing string length and point mass. An example is implemented in double_pendulum.py and described in the quick start section.
-* A pendulum which is suspended from a trolley which can move freely on a static Line or Circle. An example of this is implemented in moving_pendulum.py
-* A pendulum propelled by a FixPoint or FixCircle which is moving on a predefined Path. An example of this is implemented in moving_anchor.py
+* A pendulum which is suspended from a trolley which can move freely on a static Line or Circle. (example: moving_pendulum.py)
+* A pendulum propelled by a FixPoint or FixCircle which is moving on a predefined Path. (example: moving_anchor.py)
+* Ideal springs as Connectors with variable length and therefore 2 gerneralized coordinates. (example: swinging_spring.py)
+* Ideal springs as connectors between two components without any own DOFs. For example a trolley on a line or circle which is connected via a spring to another fixpoint which attracts it. (example: restricted_spring.py)
 * Reasonably well approximations of solid connectors with uniform density. This can be achieved by using a great number of points uniformly distributed on the connector. But since the actual kinetic energy is of second order in case of a single pendulum one can use an order 2 quadrature rule for better approximations. In fact the following 3 point quadrature rule can reproduce a single solid pendulum perfectly.
 ```
 B = FixPoint()
@@ -59,7 +61,6 @@ P2 = Point(C4,local = (1-np.sqrt(3/5))/2,mass=5/18)
 ## Stuff That May or May Not Be Implemented in the Future
 Likely:
 * Connectors with predetermined variing length
-* Springs as Connectors
 * Using Circles at the end of a connector to which trolleys or points can be connected
 
 Possibly (meaning if I have enough time and motivation... and if I can figure out how to do this):
