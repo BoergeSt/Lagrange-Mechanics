@@ -207,9 +207,30 @@ sim.addObjects([Base,S1,P1])
 sim.run()
 ```
 
+### Spring Driven Trolly
+
+If we just put a Trolly on a horizontal Fixline, nothing is going to happen. However if we add a spring between a point above the line and the Trolly, which is not in its equilibrium state, the spring will pull the Trolly towards itself. Therefore the Trolley will begin to oszillate. In this case, the spring itself has no degrees of freedom of itself.
+
+```python
+from components import Spring, Trolley, FixPoint, FixLine, Connector, Point
+from simulation import Simulation
+
+import numpy as np
+
+sim = Simulation()
+    
+Base = FixPoint(position = [0,1])
+L1 = FixLine()
+T1 = Trolley(L1, loc0 = -1,mass = 2)
+S1 = Spring(Base, T1, k = 20)
+sim.addObjects([Base, L1, T1, S1])
+
+sim.run()
+```
+
 ## Stuff That May or May Not Be Implemented in the Future
 Likely:
-* Connectors with predetermined variing length
+* Connectors with predetermined variing length 
 * Using Circles at the end of a connector to which trolleys or points can be connected
 * A free particel
 
