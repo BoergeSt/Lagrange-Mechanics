@@ -72,18 +72,25 @@ class FixPoint(Component):
 
 class FixLine(Component):
     """A fixed linear track on which a Trolley can move"""
-    def __init__(self, point1=np.array([0,0]), point2=np.array([1,0])):
-        self.point1 = point1
-        self.point2 = point2
+    def __init__(self, point1=[0,0], point2=[1,0],moving = (False, False)):
+        self.point1 = np.array(point1)
+        self.point2 = np.array(point2)
+        self.moving = moving
 
     def l2g(self, local, t=0):
-        return (1-local)*self.point1+local*self.point2
+        point1 = self.point1
+        point2 = self.point2
+        if self.moving[0]:
+            point1 = [point1[i].subs(self.t,t) for i in [0,1]]
+        if self.moving[1]:
+            point2 = [point2[i].subs(self.t,t) for i in [0,1]]
+        return (1-local)*np.array(point1)+local*np.array(point2)
 
     def l2g_expr(self, local):
-        return self.l2g(local)
+        return [(1-local)*self.point1[0]+local*self.point2[0],(1-local)*self.point1[1]+local*self.point2[1]]
 
     def plot(self, ax, t=0):
-        x,y = np.array([self.l2g(-10), self.l2g(10)]).T
+        x,y = np.array([self.l2g(-10,t), self.l2g(10,t)]).T
         ax.plot(x,y,'-k')
 
 

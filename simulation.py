@@ -143,7 +143,7 @@ class Simulation:
         logger.debug("x0 = {}".format(x0))
 
     
-        r = scipy.integrate.ode(rhs2).set_integrator('vode', method='bdf',with_jacobian=False) #bdf/adams
+        r = scipy.integrate.ode(rhs2).set_integrator('vode', method='adams',with_jacobian=False) #bdf/adams
         r.set_initial_value(x0,0)
 
         logger.debug("Initialized Integrator")
