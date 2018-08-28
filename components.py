@@ -202,13 +202,14 @@ class Trolley(Component):
         self.local = x[2*self.index]
 
 class Connector(Component):
-    def __init__(self, parent, length=1, offset = 0,phi0 = 0, dphi0 = 0):
+    def __init__(self, parent, length=1, offset = 0,phi0 = 0, dphi0 = 0, dampening = 0):
         self.parent = parent
         self.length = length
         self.offset = offset
         self.phi0 = phi0
         self.dphi0 = dphi0
         self.phi = phi0
+        self.dampening = dampening
 
 
     def setup(self, i, t):
@@ -232,7 +233,7 @@ class Connector(Component):
         ax.plot(x,y,'-k')
 
     def calculate_ode_functions(self,f,L):
-        ODE = sp.diff(sp.diff(L,self.dq),self.t) - sp.diff(L,self.q(self.t)) 
+        ODE = sp.diff(sp.diff(L,self.dq),self.t) + self.dampening*sp.diff(L,self.dq) - sp.diff(L,self.q(self.t)) 
         f.append(ODE)
 
     def substitude_symbols(self, f):
@@ -277,12 +278,6 @@ class Spring(Component):
             self.dq2 = sp.diff(self.q2(t),t)
             self.Q2,self.dQ2,self.ddQ2 = sp.symbols('Q{0} dQ{0} ddQ{0}'.format(self.phi_index))
             i += 1
-        #else:
-        #    vec = self.parent.get_position()-self.secondary_parent.get_position()
-        #    self.x0 = np.linalg.norm(vec)-self.length
-        #    self.phi0 = np.arctan2(-vec[0],vec[1])
-        #    self.x = self.x0
-        #    self.phi = self.phi0
         return i
 
     def l2g(self, local, t=0):
