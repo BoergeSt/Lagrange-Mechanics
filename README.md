@@ -1,5 +1,5 @@
 # Lagrange-Mechanics
-A simple Python3 program, which allows the automatic symbolic creation of the Lagrange equations for systems containing pendulums, springs and similar objects. It features a very simple way to set up even complex systems. Afterwards the system can be viewed in (close to) realtime, depending on the complexity of the system or recorded and saved as an mp4.
+A simple Python3 program, which allows the automatic symbolic creation of the Lagrange equations for systems containing pendulums, springs and similar objects in 2d. It features a very simple way to set up even complex systems and automatic calculation of the Lagrangian. Furthermore the characteristic ode of first order is assembled and numerically integrated in order to be able to visualize the results. Afterwards the system can be viewed in (close to) realtime using matplotlib.animation. 
 
 #### Table of Contents
 * [Disclamer](#disclaimer)
