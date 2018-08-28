@@ -11,6 +11,7 @@ A simple Python3 program, which allows the automatic symbolic creation of the La
     * [Pendulum with Moving Base](#pendulum-with-moving-base)
     * [Pendulum Freely Moving on a Circle](#pendulum-freely-moving-on-a-circle)
     * [Dampened Inverted Pendulum](#dampened-inverted-pendulum)
+    * [Freely Swinging Spring](#freely-swinging-spring)
 * [Stuff That May or May Not Be Implemented in the Future](#stuff-that-may-or-may-not-be-implemented-in-the-future)
 * [Used Moduls](#used-moduls)
 
@@ -182,6 +183,26 @@ P1 = FixPoint(moving = True, position = trace)
 C1 = Connector(P1,phi0 = np.pi*15/16,dampening = 0.2)
 P2 = Point(C1)
 sim.addObjects([P1,C1,P2])
+
+sim.run()
+```
+
+### Freely Swinging Spring
+
+The easiest form of a spring is a spring which can freely swing like a connector but can also vary in length and thereby creating an additional potential. The implementation is nearly identical to the single pendulum:
+
+```python
+from components import Spring, Point, FixPoint
+from simulation import Simulation
+
+import numpy as np
+
+sim = Simulation()
+    
+Base = FixPoint()
+S1 = Spring(Base, x0=0, phi0 = np.pi/8, k = 100)
+P1 = Point(S1)
+sim.addObjects([Base,S1,P1])
 
 sim.run()
 ```
