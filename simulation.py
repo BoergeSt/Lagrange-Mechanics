@@ -26,7 +26,7 @@ logger.addHandler(ch)
 
 
 class Simulation:
-    def __init__(self,dt = 1./30,movie=False,subintegrations = 10,xlim = (-2,2),ylim=(-2,2)):
+    def __init__(self,dt = 1./30,movie=False,subintegrations = 10,xlim = (-2,2),ylim=(-2,2), g = scipy.constants.g):
         self.dt = dt
         self.Objects = []
         self.fig = plt.figure(figsize=(20,10))
@@ -38,6 +38,7 @@ class Simulation:
         self.ax = self.fig.add_subplot(111,aspect='equal', autoscale_on=False, xlim=self.xlim, ylim=self.ylim)
         self.movie = movie
         logger.debug("Simulation initiated.")
+        self.g = g
 
 
     def addObjects(self,objects):
@@ -65,7 +66,7 @@ class Simulation:
     def calculate_potential_expr(self):
         U = 0 
         for i,object in enumerate(self.Objects):
-            Ui = object.potential_expr() 
+            Ui = object.potential_expr(self.g) 
             logger.debug("Object {} has potential {}".format(i,Ui))
             U += Ui
 

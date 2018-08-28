@@ -18,7 +18,7 @@ class Component:
         self.t = t
         return i
 
-    def potential_expr(self):
+    def potential_expr(self,g):
         """Gives back the potential energy expression for the current component."""
         
         return sp.Integer(0)
@@ -139,8 +139,8 @@ class Point(Component):
         self.t = t
         return i
 
-    def potential_expr(self):
-        return self.mass*scipy.constants.g*self.get_position_expr()[1]
+    def potential_expr(self,g):
+        return self.mass*g*self.get_position_expr()[1]
 
     def kinetic_expr(self):
         pos = self.get_position_expr()
@@ -175,8 +175,8 @@ class Trolley(Component):
         x,y = self.get_position(t).T
         ax.plot(x,y,'or')
 
-    def potential_expr(self):
-        return self.mass*scipy.constants.g*self.get_position_expr()[1]
+    def potential_expr(self,g):
+        return self.mass*g*self.get_position_expr()[1]
 
     def kinetic_expr(self):
         pos = self.get_position_expr()
@@ -329,7 +329,7 @@ class Spring(Component):
             self.x = x[2*self.x_index]
             self.phi = x[2*self.phi_index]
 
-    def potential_expr(self):
+    def potential_expr(self,g):
         if not self.secondary_parent:
             return sp.Rational(1,2)*self.k*self.q1(self.t)**2
         pos1 = self.parent.get_position_expr()
