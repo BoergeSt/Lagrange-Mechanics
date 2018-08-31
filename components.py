@@ -49,6 +49,8 @@ class Component:
         """updates the current values of the degrees of freedom corresponding to this component form the array x"""
         pass
 
+    def init_plot(self,ax):
+        self.ax = ax
 
 
     
@@ -66,9 +68,14 @@ class FixPoint(Component):
     def get_position_expr(self):
         return self.position
 
-    def plot(self, ax, t=0):
+    def plot(self, t=0):
         x,y = self.get_position(t).T
-        ax.plot(x,y,'ok')
+        self.plt_data.set_data(x,y)
+        return self.plt_data
+
+    def init_plot(self,ax):
+        self.ax = ax
+        self.plt_data, = ax.plot([],[],'ok')
 
 class FixLine(Component):
     """A fixed linear track on which a Trolley can move"""
@@ -89,9 +96,14 @@ class FixLine(Component):
     def l2g_expr(self, local):
         return [(1-local)*self.point1[0]+local*self.point2[0],(1-local)*self.point1[1]+local*self.point2[1]]
 
-    def plot(self, ax, t=0):
+    def plot(self, t=0):
         x,y = np.array([self.l2g(-10,t), self.l2g(10,t)]).T
-        ax.plot(x,y,'-k')
+        self.plt_data.set_data(x,y)
+        return self.plt_data
+
+    def init_plot(self,ax):
+        self.ax = ax
+        self.plt_data, = ax.plot([],[],'-k')
 
 
 class FixCircle(Component):
@@ -109,12 +121,24 @@ class FixCircle(Component):
     def l2g_expr(self, local):
         return [self.midpoint[0]+self.radius*sp.sin(local), self.midpoint[1]-self.radius*sp.cos(local)]
 
-    def plot(self, ax, t=0):
+    def init_plot(self,ax):
+        self.ax = ax
+        t = 0
         if self.moving:
-            circle = plt.Circle((self.midpoint[0].subs(self.t,t), self.midpoint[1].subs(self.t,t)), self.radius,color = "black",fill=False)
+            self.circle = plt.Circle((self.midpoint[0].subs(self.t,t), self.midpoint[1].subs(self.t,t)), self.radius,color = "black",fill=False)
         else:
-            circle = plt.Circle(self.midpoint,self.radius,color = "black",fill=False)
-        ax.add_artist(circle)
+            self.circle = plt.Circle(self.midpoint,self.radius,color = "black",fill=False)
+        
+        self.ax.add_artist(self.circle)
+
+    def plot(self, t=0):
+        x,y = self.midpoint
+        if self.moving:
+            x = self.midpoint[0].subs(self.t,t)
+            y = self.midpoint[1].subs(self.t,t)
+        print(str((x,y)))
+        self.circle.center = (x,y)
+        return self.circle
 
 
 
@@ -130,10 +154,6 @@ class Point(Component):
 
     def get_position_expr(self):
         return self.parent.l2g_expr(self.local)
-
-    def plot(self, ax, t=0):
-        x,y = self.get_position(t).T
-        ax.plot(x,y,'og')
     
     def setup(self, i, t):
         self.t = t
@@ -146,7 +166,16 @@ class Point(Component):
         pos = self.get_position_expr()
         v = [sp.diff(pos[0], self.t), sp.diff(pos[1],self.t)]
         return 0.5*self.mass*(v[0]**2+v[1]**2)
+   
+   
+    def plot(self, t=0):
+        x,y = self.get_position(t).T
+        self.plt_data.set_data(x,y)
+        return self.plt_data
 
+    def init_plot(self,ax):
+        self.ax = ax
+        self.plt_data, = ax.plot([],[],'og')
     
 class Trolley(Component):
     """A mass point moving on a FixLine"""
@@ -171,9 +200,6 @@ class Trolley(Component):
     def get_position_expr(self):
         return self.parent.l2g_expr(self.q(self.t))
 
-    def plot(self, ax, t=0):
-        x,y = self.get_position(t).T
-        ax.plot(x,y,'or')
 
     def potential_expr(self,g):
         return self.mass*g*self.get_position_expr()[1]
@@ -200,6 +226,17 @@ class Trolley(Component):
 
     def update(self, x):
         self.local = x[2*self.index]
+
+
+    def plot(self, t=0):
+        x,y = self.get_position(t).T
+        self.plt_data.set_data(x,y)
+        return self.plt_data
+
+    def init_plot(self,ax):
+        self.ax = ax
+        self.plt_data, = ax.plot([],[],'or')
+
 
 class Connector(Component):
     def __init__(self, parent, length=1, offset = 0,phi0 = 0, dphi0 = 0, dampening = 0):
@@ -228,9 +265,6 @@ class Connector(Component):
         par_pos = self.parent.get_position_expr()
         return [par_pos[0]+modifier*sp.sin(self.q(self.t)),par_pos[1]-modifier*sp.cos(self.q(self.t))]
     
-    def plot(self, ax, t=0):
-        x,y = np.array([self.l2g(0,t),self.l2g(1,t)]).T
-        ax.plot(x,y,'-k')
 
     def calculate_ode_functions(self,f,L):
         ODE = sp.diff(sp.diff(L,self.dq),self.t) + self.dampening*sp.diff(L,self.dq) - sp.diff(L,self.q(self.t)) 
@@ -249,6 +283,15 @@ class Connector(Component):
 
     def update(self, x):
         self.phi = x[2*self.index]
+
+    def plot(self, t=0):
+        x,y = np.array([self.l2g(0,t),self.l2g(1,t)]).T
+        self.plt_data.set_data(x,y)
+        return self.plt_data
+
+    def init_plot(self,ax):
+        self.ax = ax
+        self.plt_data, = ax.plot([],[],'-k')
 
 
 class Spring(Component):
@@ -294,9 +337,7 @@ class Spring(Component):
         return [(1-local)*par_pos[0]+local*par_pos2[0], (1-local)*par_pos[1]+local*par_pos2[1]]
     
 
-    def plot(self, ax, t=0):
-        x,y = np.array([self.l2g(0,t),self.l2g(1,t)]).T
-        ax.plot(x,y,'-y')
+
 
     def calculate_ode_functions(self,f,L):
         if not self.secondary_parent:
@@ -336,3 +377,13 @@ class Spring(Component):
         pos2 = self.secondary_parent.get_position_expr()
         x = sp.sqrt((pos1[0]-pos2[0])**2+(pos1[1]-pos2[1])**2)
         return sp.Rational(1,2)*self.k*x**2
+
+
+    def plot(self, t=0):
+        x,y = np.array([self.l2g(0,t),self.l2g(1,t)]).T
+        self.plt_data.set_data(x,y)
+        return self.plt_data
+
+    def init_plot(self,ax):
+        self.ax = ax
+        self.plt_data, = ax.plot([],[],'-y')

@@ -45,14 +45,20 @@ class Simulation:
         self.Objects.extend(objects)
         logger.debug("Added objects")
 
+    def init_plot(self):
+        for object in self.Objects:
+            object.init_plot(self.ax)
+
     def plot(self, t = 0):
-        self.ax.cla()
-        self.ax.autoscale(False)
-        self.ax.set_xlim(self.xlim)
-        self.ax.set_ylim(self.ylim)
+        #self.ax.cla()
+        #self.ax.autoscale(False)
+        #self.ax.set_xlim(self.xlim)
+        #self.ax.set_ylim(self.ylim)
+        res = []
 
         for object in self.Objects:
-            object.plot(self.ax,t) 
+            res.append(object.plot(t))
+        return res
 
     def setup(self): #TODO: can fail if objects are in wrong order
         logger.debug("Starting setup")
@@ -125,6 +131,7 @@ class Simulation:
 
     def run(self):
         self.setup()
+        self.init_plot()
         self.plot()
         L = self.calculate_lagrange_expr()
         f = self.calculate_ode_functions(L)
@@ -153,9 +160,11 @@ class Simulation:
         def animate(i):
             for i in range(self.subintegrations):
                 r.integrate(r.t+self.dt/self.subintegrations)
+            if not r.successful():
+                r.t += self.dt
             self.update(r.y)
-            #print(r.t)
-            self.plot(r.t)
+            res = tuple(self.plot(r.t))
+            return res
 
 
     
@@ -166,7 +175,7 @@ class Simulation:
 
 
         anim = animation.FuncAnimation(self.fig, animate, frames=300,
-                                      interval=interval)
+                                      interval=interval, blit = True)
 
         if self.movie:
             anim.save('lagrange.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
