@@ -89,8 +89,11 @@ class Simulation:
 
     def calculate_lagrange_expr(self):
         L = sp.simplify(self.calculate_kinetic_expr()-self.calculate_potential_expr())
-        logger.info("Lagrange Function:\n\tL = {}".format(L))
-        return L
+        Lp = [L]
+        for object in self.Objects:
+            object.substitude_symbols(Lp)
+        logger.info("Lagrange Function:\n\tL = {}".format(Lp))
+        return L,Lp
 
     def calculate_ode_functions(self,L):
         f = []
@@ -112,6 +115,8 @@ class Simulation:
             except KeyError:
                 f[i] = sp.Integer(0)
                 logger.warning("Symbol {} not found in solution. Setting it to 0".format(s[i]))
+        for i,fun in enumerate(f):
+            f[i] = sp.simplify(fun)
         return f 
 
     def get_x0(self):
@@ -130,11 +135,13 @@ class Simulation:
         for object in self.Objects:
             object.update(x)
 
+    
+
     def run(self):
         self.setup()
         self.init_plot()
         self.plot()
-        L = self.calculate_lagrange_expr()
+        L,Lp = self.calculate_lagrange_expr()
         f = self.calculate_ode_functions(L)
     
         s=self.get_symbols()
