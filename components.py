@@ -52,6 +52,9 @@ class Component:
     def init_plot(self,ax):
         self.ax = ax
 
+    def evaluate(self,L):
+        return L 
+
 
     
 class FixPoint(Component):
@@ -136,7 +139,6 @@ class FixCircle(Component):
         if self.moving:
             x = self.midpoint[0].subs(self.t,t)
             y = self.midpoint[1].subs(self.t,t)
-        print(str((x,y)))
         self.circle.center = (x,y)
         return self.circle
 
@@ -185,6 +187,7 @@ class Trolley(Component):
         self.loc0 = loc0
         self.dloc0 = dloc0
         self.local = loc0
+        self.dlocal = dloc0
         
     def setup(self, i, t):
         self.index = i
@@ -226,6 +229,7 @@ class Trolley(Component):
 
     def update(self, x):
         self.local = x[2*self.index]
+        self.dlocal = x[2*self.index+1]
 
 
     def plot(self, t=0):
@@ -237,6 +241,9 @@ class Trolley(Component):
         self.ax = ax
         self.plt_data, = ax.plot([],[],'or')
 
+    def evaluate(self,L):
+        return L.subs(self.Q,self.local).subs(self.q(self.t),self.local).subs(self.dQ,self.dlocal).subs(self.dq,self.dlocal)
+
 
 class Connector(Component):
     def __init__(self, parent, length=1, offset = 0,phi0 = 0, dphi0 = 0, dampening = 0):
@@ -246,6 +253,7 @@ class Connector(Component):
         self.phi0 = phi0
         self.dphi0 = dphi0
         self.phi = phi0
+        self.dphi = dphi0
         self.dampening = dampening
 
 
@@ -283,6 +291,7 @@ class Connector(Component):
 
     def update(self, x):
         self.phi = x[2*self.index]
+        self.dphi = x[2*self.index+1]
 
     def plot(self, t=0):
         x,y = np.array([self.l2g(0,t),self.l2g(1,t)]).T
@@ -292,6 +301,9 @@ class Connector(Component):
     def init_plot(self,ax):
         self.ax = ax
         self.plt_data, = ax.plot([],[],'-k')
+
+    def evaluate(self,L):
+        return L.subs(self.Q,self.phi).subs(self.q(self.t),self.phi).subs(self.dQ,self.dphi).subs(self.dq,self.dphi)
 
 
 class Spring(Component):
@@ -305,6 +317,7 @@ class Spring(Component):
         self.phi0 = phi0
         self.dphi0 = dphi0
         self.phi = phi0
+        self.dphi = dphi0
         self.k = k
 
     def setup(self, i, t):
@@ -368,7 +381,9 @@ class Spring(Component):
     def update(self, x):
         if not self.secondary_parent:
             self.x = x[2*self.x_index]
+            self.dx = x[2*self.x_index+1]
             self.phi = x[2*self.phi_index]
+            self.dphi = x[2*self.phi_index+1]
 
     def potential_expr(self,g):
         if not self.secondary_parent:
@@ -387,3 +402,9 @@ class Spring(Component):
     def init_plot(self,ax):
         self.ax = ax
         self.plt_data, = ax.plot([],[],'-y')
+
+    def evaluate(self,L):
+        if self.secondary_parent:
+            return L
+        L = L.subs(self.Q1,self.x).subs(self.q1(self.t),self.x).subs(self.dQ1,self.dx).subs(self.dq1,self.dx)
+        return L.subs(self.Q2,self.phi).subs(self.q2(self.t),self.phi).subs(self.dQ2,self.dphi).subs(self.dq2,self.dphi)

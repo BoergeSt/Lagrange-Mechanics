@@ -26,7 +26,7 @@ logger.addHandler(ch)
 
 
 class Simulation:
-    def __init__(self,dt = 1./30,movie=False,subintegrations = 10,xlim = (-2,2),ylim=(-2,2), g = scipy.constants.g):
+    def __init__(self,dt = 1./30,movie=False,subintegrations = 10,xlim = (-2,2),ylim=(-2,2), g = scipy.constants.g, show_energy = True):
         self.dt = dt
         self.Objects = []
         self.fig = plt.figure(figsize=(20,10))
@@ -39,6 +39,7 @@ class Simulation:
         self.movie = movie
         logger.debug("Simulation initiated.")
         self.g = g
+        self.show_energy = show_energy
 
 
     def addObjects(self,objects):
