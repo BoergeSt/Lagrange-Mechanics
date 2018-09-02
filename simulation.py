@@ -26,7 +26,7 @@ logger.addHandler(ch)
 
 
 class Simulation:
-    def __init__(self,dt = 1./30,movie=False,subintegrations = 10,xlim = (-2,2),ylim=(-2,2), g = scipy.constants.g, show_energy = True):
+    def __init__(self,dt = 1./30,movie=False,subintegrations = 10,xlim = (-2,2),ylim=(-2,2), g = scipy.constants.g, show_information = True):
         self.dt = dt
         self.Objects = []
         self.fig = plt.figure(figsize=(20,10))
@@ -39,7 +39,7 @@ class Simulation:
         self.movie = movie
         logger.debug("Simulation initiated.")
         self.g = g
-        self.show_energy = show_energy
+        self.show_information = show_information
 
 
     def addObjects(self,objects):
@@ -88,12 +88,16 @@ class Simulation:
         return sp.simplify(T)
 
     def calculate_lagrange_expr(self):
-        L = sp.simplify(self.calculate_kinetic_expr()-self.calculate_potential_expr())
-        Lp = [L]
+        T = self.calculate_kinetic_expr()
+        U = self.calculate_potential_expr()
+        L = sp.simplify(T-U)
+        H = sp.simplify(T+U)
+        Lp = [L,H]
         for object in self.Objects:
             object.substitude_symbols(Lp)
-        logger.info("Lagrange Function:\n\tL = {}".format(Lp))
-        return L,Lp
+        logger.info("Lagrange Function:\n\tL = {}".format(Lp[0]))
+        logger.info("Lagrange Function unchanged:\n\tL = {}".format(L))
+        return L,Lp[0],Lp[1]
 
     def calculate_ode_functions(self,L):
         f = []
@@ -135,13 +139,19 @@ class Simulation:
         for object in self.Objects:
             object.update(x)
 
+    def evaluate(self,L,t):
+        for object in self.Objects:
+            L = object.evaluate(L)
+        L = L.doit()
+        L = L.subs(self.t,t)
+        return L
     
 
     def run(self):
         self.setup()
         self.init_plot()
         self.plot()
-        L,Lp = self.calculate_lagrange_expr()
+        L,Lp,H = self.calculate_lagrange_expr()
         f = self.calculate_ode_functions(L)
     
         s=self.get_symbols()
@@ -164,6 +174,11 @@ class Simulation:
 
         logger.debug("Initialized Integrator")
 
+        time_template = 'time = %.1fs'
+        energy_template = 'energy = %.1f'
+        time_text = self.ax.text(0.05, 0.9, '', transform=self.ax.transAxes)
+        energy_text = self.ax.text(0.05,0.87,'', transform=self.ax.transAxes)
+
 
         def animate(i):
             for i in range(self.subintegrations):
@@ -171,8 +186,12 @@ class Simulation:
             if not r.successful():
                 r.t += self.dt
             self.update(r.y)
-            res = tuple(self.plot(r.t))
-            return res
+            res = self.plot(r.t)
+            if self.show_information:
+                time_text.set_text(time_template % r.t)
+                energy_text.set_text(energy_template % (self.evaluate(H,r.t)))
+                res.extend([time_text,energy_text])
+            return tuple(res)
 
 
     

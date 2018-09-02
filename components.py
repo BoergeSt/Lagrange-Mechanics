@@ -242,7 +242,7 @@ class Trolley(Component):
         self.plt_data, = ax.plot([],[],'or')
 
     def evaluate(self,L):
-        return L.subs(self.Q,self.local).subs(self.q(self.t),self.local).subs(self.dQ,self.dlocal).subs(self.dq,self.dlocal)
+        return L.subs(self.dQ,self.dlocal).subs(self.dq,self.dlocal).subs(self.Q,self.local).subs(self.q(self.t),self.local)
 
 
 class Connector(Component):
@@ -303,7 +303,7 @@ class Connector(Component):
         self.plt_data, = ax.plot([],[],'-k')
 
     def evaluate(self,L):
-        return L.subs(self.Q,self.phi).subs(self.q(self.t),self.phi).subs(self.dQ,self.dphi).subs(self.dq,self.dphi)
+        return L.subs(self.dQ,self.dphi).subs(self.dq,self.dphi).subs(self.Q,self.phi).subs(self.q(self.t),self.phi)
 
 
 class Spring(Component):
@@ -406,5 +406,5 @@ class Spring(Component):
     def evaluate(self,L):
         if self.secondary_parent:
             return L
-        L = L.subs(self.Q1,self.x).subs(self.q1(self.t),self.x).subs(self.dQ1,self.dx).subs(self.dq1,self.dx)
-        return L.subs(self.Q2,self.phi).subs(self.q2(self.t),self.phi).subs(self.dQ2,self.dphi).subs(self.dq2,self.dphi)
+        L = L.subs(self.dQ1,self.dx).subs(self.dq1,self.dx).subs(self.Q1,self.x).subs(self.q1(self.t),self.x)
+        return L.subs(self.dQ2,self.dphi).subs(self.dq2,self.dphi).subs(self.Q2,self.phi).subs(self.q2(self.t),self.phi)
