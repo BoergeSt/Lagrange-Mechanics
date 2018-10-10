@@ -55,6 +55,7 @@ There are by now a fair number of components from which one can build up a syste
   * 1d:
     * FixLine: An "infinite" Line similar to the FixPoint
     * FixCircle: Like the FixLine but circular. It can also move along predetermined paths.
+    * FixCurve: An arbitrary parameterized curve on which a trolly can move.
 * PhysicsGroup:
   * 0d:
     * Point: A point which carries a mass. It keeps stationary on the local coordinates of the 1d object it is attached to.
