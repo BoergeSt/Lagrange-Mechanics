@@ -108,6 +108,38 @@ class FixLine(Component):
         self.ax = ax
         self.plt_data, = ax.plot([],[],'-k')
 
+class FixCurve(Component):
+    """A fixed track which follows an arbitrary curve on which a Trolley can move"""
+    def __init__(self, curve, var, moving = False,plot_interval = (-2,2),plot_points = 10):
+        self.curve = curve
+        self.var = var
+        self.moving = moving
+        self.plot_interval = plot_interval
+        self.plot_points = plot_points
+
+    def l2g(self, local, t=0):
+        pos = [self.curve[0].subs(self.var,local),self.curve[1].subs(self.var,local)]
+        if self.moving:
+            pos = [pos[0].subs(self.t,t),pos[1].subs(self.t,t)]
+        return np.array(pos)
+
+    def l2g_expr(self, local):
+        pos = [self.curve[0].subs(self.var,local),self.curve[1].subs(self.var,local)]
+        return pos
+
+    def plot(self, t=0):
+        if self.first and not self.moving:
+            return self.plt_data
+        eval = np.linspace(self.plot_interval[0],self.plot_interval[1],self.plot_points)
+        x,y = np.array([self.l2g(i,t) for i in eval]).T
+        self.plt_data.set_data(x,y)
+        self.first = True
+        return self.plt_data
+
+    def init_plot(self,ax):
+        self.ax = ax
+        self.plt_data, = ax.plot([],[],'-k')
+        self.first = False
 
 class FixCircle(Component):
     """A fixed circular crack on which a Trolley can move"""
